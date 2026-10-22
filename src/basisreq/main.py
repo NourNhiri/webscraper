@@ -1,5 +1,5 @@
 import click
-
+import re
 from bs4 import BeautifulSoup as b
 from .functions import *
 
@@ -44,11 +44,13 @@ def search(link,prettify,localfile,findimg):
         for img in findJPG(b(t,'html.parser')):
             click.echo(img)
     elif prettify:
+        
         click.echo(b(t,'html.parser').prettify())
    
 
     else:
-        click.echo(t)
+        t=b(t,'html.parser').getText(" ")
+        click.echo(re.findall(r'\w+',t))
 
 
 cli.add_command(addPost)
