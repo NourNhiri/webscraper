@@ -5,6 +5,7 @@ from spellchecker import SpellChecker as s
 from collections import Counter
 import click
 import re
+from urllib.parse import urljoin, urlsplit
 def getData(link=BASE_URL, route=""):
     """GET a url and return the JSON as Python data."""
     r = fetch(link + route)
@@ -40,7 +41,7 @@ def findJPG(html:b):
     return tags
 
 
-def CountLinks(t):
+def CountLinks(t,link):
     items=[]
     soup=b(t,"html.parser")
     if input("want a count of words?")=="y":
@@ -53,7 +54,13 @@ def CountLinks(t):
         links=[]
         a=soup.find_all("a",href=True)
         for tag in a:
-            links.append(tag.get("href"))
+            
+            l=urljoin(link,tag.get("href"))
+            split=urlsplit(l)
+            if split.scheme in ("http","https"):
+                links.append(l)
+        
+                
         
         items.append(links)
     

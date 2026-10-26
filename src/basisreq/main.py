@@ -53,7 +53,7 @@ def search(link,prettify,localfile,findimg):
 
     else:
         
-        for item in CountLinks(t):
+        for item in CountLinks(t,link):
             print(item)
 
 
