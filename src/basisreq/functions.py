@@ -4,6 +4,7 @@ BASE_URL = "http://localhost:3000/"
 from spellchecker import SpellChecker as s
 from collections import Counter
 import click
+import re
 def getData(link=BASE_URL, route=""):
     """GET a url and return the JSON as Python data."""
     r = fetch(link + route)
@@ -39,9 +40,25 @@ def findJPG(html:b):
     return tags
 
 
-def printCount(list):
-    count=Counter(list)
-    return count
+def CountLinks(t):
+    items=[]
+    soup=b(t,"html.parser")
+    if input("want a count of words?")=="y":
+        
+        text=re.findall(r"\w+",soup.getText(" "))
+        count=Counter(text)
+        items.append(count)
+        print(count)
+    if input("want all the links?")=="y":
+        links=[]
+        a=soup.find_all("a",href=True)
+        for tag in a:
+            links.append(tag.get("href"))
+        
+        items.append(links)
+    
+    
+    return items
     
 
 

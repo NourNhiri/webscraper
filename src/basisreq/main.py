@@ -40,6 +40,9 @@ def search(link,prettify,localfile,findimg):
                 t=f.read()
     else:
         t=fetch(link).text
+        
+        input("printing t")
+        
     if findimg:
         for img in findJPG(b(t,'html.parser')):
             click.echo(img)
@@ -49,11 +52,9 @@ def search(link,prettify,localfile,findimg):
    
 
     else:
-        t=b(t,'html.parser').getText(" ")
-        listOfWords=re.findall(r'\w+',t)
-        click.echo(listOfWords)
-        if input("want a word count?")=="y":
-            print(printCount(listOfWords))
+        
+        for item in CountLinks(t):
+            print(item)
 
 
 cli.add_command(addPost)
