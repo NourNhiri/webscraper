@@ -1,6 +1,8 @@
 import requests
 from bs4 import BeautifulSoup as b
 BASE_URL = "http://localhost:3000/"
+from spellchecker import SpellChecker as s
+from collections import Counter
 import click
 def getData(link=BASE_URL, route=""):
     """GET a url and return the JSON as Python data."""
@@ -35,6 +37,12 @@ def findJPG(html:b):
                 tags.append(src)
 
     return tags
+
+
+def printCount(list):
+    count=Counter(list)
+    return count
+    
 
 
 

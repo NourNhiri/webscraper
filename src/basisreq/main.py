@@ -50,7 +50,10 @@ def search(link,prettify,localfile,findimg):
 
     else:
         t=b(t,'html.parser').getText(" ")
-        click.echo(re.findall(r'\w+',t))
+        listOfWords=re.findall(r'\w+',t)
+        click.echo(listOfWords)
+        if input("want a word count?")=="y":
+            print(printCount(listOfWords))
 
 
 cli.add_command(addPost)

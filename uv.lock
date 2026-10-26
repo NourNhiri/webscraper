@@ -9,6 +9,7 @@ source = { editable = "." }
 dependencies = [
     { name = "beautifulsoup4" },
     { name = "click" },
+    { name = "pyspellchecker" },
     { name = "requests" },
 ]
 
@@ -16,6 +17,7 @@ dependencies = [
 requires-dist = [
     { name = "beautifulsoup4", specifier = ">=4.15.0" },
     { name = "click", specifier = ">=8.5.0" },
+    { name = "pyspellchecker", specifier = ">=0.9.1" },
     { name = "requests", specifier = ">=2.34.2" },
 ]
 
@@ -151,6 +153,15 @@ source = { registry = "https://pypi.org/simple" }
 sdist = { url = "https://files.pythonhosted.org/packages/f5/08/8eea9d4b8302028f3abb2c0813953f7aec26d33b7a8960ed760e65ff29fa/idna-3.20.tar.gz", hash = "sha256:a7db850025b95ded1eae8a46181a1a6c56c92c96f0e2b005d9ff8dc0210cab44", size = 216463, upload-time = "2026-09-17T14:11:04.752Z" }
 wheels = [
     { url = "https://files.pythonhosted.org/packages/58/a2/bb081bab032533a855d44de1d56f8e8426114ff1ba5d1f07a438a0a654f8/idna-3.20-py3-none-any.whl", hash = "sha256:ab7ae7122974553370f0bdb919e1a960b2cd1bc1ef0276416d896db81c14582c", size = 69583, upload-time = "2026-09-17T14:11:03.168Z" },
+]
+
+[[package]]
+name = "pyspellchecker"
+version = "0.9.1"
+source = { registry = "https://pypi.org/simple" }
+sdist = { url = "https://files.pythonhosted.org/packages/fa/95/d51ece11c06aeefac50dd64459ae1c565d2d43fe27f826bebc760ee950ed/pyspellchecker-0.9.1.tar.gz", hash = "sha256:786c21f082d4059b139bca922cd6db6c85c800374b904b59a8f61d75a0a62d7f", size = 7239938, upload-time = "2026-10-10T16:13:31.059Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/7f/3b/558bc6def007152f0128ff0c8a6825708ac22bafdb295dc85cbec1f6ec22/pyspellchecker-0.9.1-py3-none-any.whl", hash = "sha256:c79b144b4bad20024bf489ad3ffd96b76f3f53439e9fa59ac607896352852f3d", size = 7237189, upload-time = "2026-10-10T16:13:29.045Z" },
 ]
 
 [[package]]
