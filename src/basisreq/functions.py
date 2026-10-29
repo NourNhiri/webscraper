@@ -5,6 +5,8 @@ from collections import Counter
 import re
 from urllib.parse import urljoin, urlsplit, urldefrag
 from .requests import getData, fetch
+import asyncio
+import aiohttp
 def findJPG(html:b):
     tags=[]
     for tag in html.find_all("img"):
@@ -18,11 +20,23 @@ def findJPG(html:b):
 
     return tags
 
+async def asSearch(link):
+    async with aiohttp.ClientSession() as session:
+        async with session.get(link) as r:
+            t=await r.text()
+    soup=b(t,"html.parser")
+    text=re.findall(r"\w+",soup.getText(" "))
+    count=Counter(text)
+    return count
 
-def CountLinks(t,link):
+def getPages(t,link,depth,mode):
     link=[link]
+    if mode:
+       count=asyncio.run(asSearch(link[0]))
+       print(count)
+       return
     if input("want all the links? + the count?")=="y":
-        res=recursiveSearch(links=link)
+        res=recursiveSearch(links=link,Max=depth)
         print(res[0])
         print(f"we visited {res[1]} total links excluding fetch errors")
        
@@ -45,8 +59,8 @@ def absoluteLinks(soup,link):
     
 
 
-def recursiveSearch(links,counter=None,depth=0,seen=None,totalLinks=None):
-    if depth==2:return [counter,totalLinks]
+def recursiveSearch(links,counter=None,depth=0,seen=None,totalLinks=None,Max=2):
+    if depth==Max:return [counter,totalLinks]
     if seen==None:seen=set()
     if counter==None:counter=Counter()
     if totalLinks is None: totalLinks=[0]
@@ -65,7 +79,7 @@ def recursiveSearch(links,counter=None,depth=0,seen=None,totalLinks=None):
                 counter.update(count)
                 newlinks=absoluteLinks(soup,item)
                 new_dept=depth+1
-                recursiveSearch(newlinks,counter,new_dept,seen,totalLinks)
+                recursiveSearch(newlinks,counter,new_dept,seen,totalLinks,Max)
     return [counter,totalLinks[0]]
 
 
