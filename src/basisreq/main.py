@@ -1,8 +1,8 @@
 import click
-import re
 from bs4 import BeautifulSoup as b
 from .functions import *
-
+import requests
+from .requests import getData
 
 
 @click.group()
@@ -53,8 +53,8 @@ def search(link,prettify,localfile,findimg):
 
     else:
         
-        for item in CountLinks(t,link):
-            print(item)
+        CountLinks(t,link)
+            
 
 
 cli.add_command(addPost)
