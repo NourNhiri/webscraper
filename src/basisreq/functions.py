@@ -9,6 +9,7 @@ import asyncio
 import aiohttp
 from click import ClickException
 def findJPG(html:b):
+    """Return the src of every .jpg image in the soup, without the query string."""
     tags=[]
     for tag in html.find_all("img"):
         
@@ -27,6 +28,7 @@ def findJPG(html:b):
         
     
 def handleSoup(totalLinks,counter,t,depth,link):
+    """Process the HTML of one page: update the page total and word counter, return its links and the next depth."""
     totalLinks[0]+=1
     print(f"fetched {link}")
     soup=b(t,"html.parser")
@@ -38,6 +40,7 @@ def handleSoup(totalLinks,counter,t,depth,link):
 
 
 def getPages(t,link,depth,mode):
+    """Crawl from link and print the result: async if mode is True, otherwise sync after asking the user."""
     link=[link]
     if mode:
        count=asyncio.run(asSearch(link,Max=depth))
@@ -50,10 +53,12 @@ def getPages(t,link,depth,mode):
        
 
 def countWords(soup):
+    """Return a Counter of all words in the text of the soup."""
     text=re.findall(r"\w+",soup.getText(" "))
     count=Counter(text)
     return count
 def absoluteLinks(soup,link):
+    """Return the http and https links in the soup as absolute urls without fragment, skipping invalid ones."""
     a=soup.find_all("a",href=True)
     links=[]
     for tag in a:
@@ -70,6 +75,7 @@ def absoluteLinks(soup,link):
     return links
     
 async def runLinks(link,totalLinks,counter,depth,seen,Max):
+    """Fetch one link with aiohttp, process the page and crawl its links; on a failed fetch print the error and skip it."""
     async with aiohttp.ClientSession() as session:
         try:
             async with session.get(link) as r:
@@ -85,6 +91,7 @@ async def runLinks(link,totalLinks,counter,depth,seen,Max):
             print(f"geen inhoud gekregen {e}")
 
 def recursiveSearch(links,counter=None,depth=0,seen=None,totalLinks=None,Max=2):
+    """Crawl links one by one, recursively up to depth Max, and return the word counter and the page total."""
     if depth==Max:return [counter,totalLinks]
     if seen==None:seen=set()
     if counter==None:counter=Counter()
@@ -104,6 +111,7 @@ def recursiveSearch(links,counter=None,depth=0,seen=None,totalLinks=None,Max=2):
 
 
 async def asSearch(links,counter=None,depth=0,seen=None,totalLinks=None,Max=2):
+    """Crawl links concurrently with asyncio.gather, recursively up to depth Max, and return the word counter and the page total."""
     if depth==Max:return [counter,totalLinks]
     if seen==None:seen=set()
     if counter==None:counter=Counter()

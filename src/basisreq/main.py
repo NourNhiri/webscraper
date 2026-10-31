@@ -7,6 +7,7 @@ from .requests import getData
 
 @click.group()
 def cli():
+    """Scrape web pages and add posts to the JSON server."""
     pass
 
 @click.command
