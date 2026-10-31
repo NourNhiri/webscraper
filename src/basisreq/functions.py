@@ -7,6 +7,7 @@ from urllib.parse import urljoin, urlsplit, urldefrag
 from .requests import getData, fetch
 import asyncio
 import aiohttp
+from click import ClickException
 def findJPG(html:b):
     tags=[]
     for tag in html.find_all("img"):
@@ -38,6 +39,7 @@ async def runLinks(link,totalLinks,counter,depth,seen,Max):
     async with aiohttp.ClientSession() as session:
         try:
             async with session.get(link) as r:
+                r.raise_for_status()
                 t=await r.text()
                 totalLinks[0]+=1
                 print(f"fetched {link}")
@@ -49,6 +51,10 @@ async def runLinks(link,totalLinks,counter,depth,seen,Max):
                 await asSearch(newlinks,counter,new_dept,seen,totalLinks,Max)
         except aiohttp.ClientError as e:
             print(e)
+        except TimeoutError as e:
+            print(e)
+        except UnicodeError as e:
+            print(f"geen inhoud gekregen {e}")
         
     
 
@@ -73,8 +79,12 @@ def absoluteLinks(soup,link):
     a=soup.find_all("a",href=True)
     links=[]
     for tag in a:
-        
-        l=urljoin(link,tag.get("href"))
+        try:
+            l=urljoin(link,tag.get("href"))
+        except ValueError as e:
+            print(f"could not join links {e}")
+            continue
+            
         split=urlsplit(l)
         if split.scheme in ("http","https"):
             l=urldefrag(l)[0]
@@ -93,7 +103,7 @@ def recursiveSearch(links,counter=None,depth=0,seen=None,totalLinks=None,Max=2):
             seen.add(item)
             try:
                 html=fetch(item).text 
-            except Exception as e:
+            except ClickException as e:
                 print(e)
             else:
                 totalLinks[0]+=1

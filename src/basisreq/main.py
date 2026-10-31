@@ -42,15 +42,22 @@ def search(link,prettify,localfile,findimg,depth,mode):
     
         
     if localfile:
-            with open(localfile,encoding='utf-8') as f:
-                t=f.read()
+            try:
+                with open(localfile,encoding='utf-8') as f:
+                    t=f.read()
+            except FileNotFoundError as e:
+                click.echo(f"file bestaat niet:{e}")
+            
     else:
         t=fetch(link).text
 
         
     if findimg:
-        for img in findJPG(b(t,'html.parser')):
-            click.echo(img)
+        try:
+            for img in findJPG(b(t,'html.parser')):
+                click.echo(img)
+        except AttributeError as e:
+            click.echo(f"there was an error while trying to read html {e}")
     elif prettify:
         
         click.echo(b(t,'html.parser').prettify())
