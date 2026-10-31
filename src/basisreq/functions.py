@@ -25,23 +25,32 @@ async def asSearch(links,counter=None,depth=0,seen=None,totalLinks=None,Max=2):
     if seen==None:seen=set()
     if counter==None:counter=Counter()
     if totalLinks is None: totalLinks=[0]
+    tasks=[]
     for link in links:
         if link not in seen:
             seen.add(link)
-            async with aiohttp.ClientSession() as session:
-                async with session.get(link) as r:
-                    t=await r.text()
-                    totalLinks[0]+=1
-                    print(f"fetched {link}")
-                    soup=b(t,"html.parser")
-                    count=countWords(soup)
-                    counter.update(count)
-                    newlinks=absoluteLinks(soup,link)
-                    new_dept=depth+1
-                    await asyncio.gather(*asSearch(newlinks,counter,new_dept,seen,totalLinks,Max))
+            tasks.append(runLinks(link,totalLinks,counter,depth,seen,Max))
+    await asyncio.gather(*tasks)
 
     return [counter,totalLinks[0]]
             
+async def runLinks(link,totalLinks,counter,depth,seen,Max):
+    async with aiohttp.ClientSession() as session:
+        try:
+            async with session.get(link) as r:
+                t=await r.text()
+                totalLinks[0]+=1
+                print(f"fetched {link}")
+                soup=b(t,"html.parser")
+                count=countWords(soup)
+                counter.update(count)
+                newlinks=absoluteLinks(soup,link)
+                new_dept=depth+1
+                await asSearch(newlinks,counter,new_dept,seen,totalLinks,Max)
+        except aiohttp.ClientError as e:
+            print(e)
+        
+    
 
 
 def getPages(t,link,depth,mode):
