@@ -20,19 +20,34 @@ def findJPG(html:b):
 
     return tags
 
-async def asSearch(link):
-    async with aiohttp.ClientSession() as session:
-        async with session.get(link) as r:
-            t=await r.text()
-    soup=b(t,"html.parser")
-    text=re.findall(r"\w+",soup.getText(" "))
-    count=Counter(text)
-    return count
+async def asSearch(links,counter=None,depth=0,seen=None,totalLinks=None,Max=2):
+    if depth==Max:return [counter,totalLinks]
+    if seen==None:seen=set()
+    if counter==None:counter=Counter()
+    if totalLinks is None: totalLinks=[0]
+    for link in links:
+        if link not in seen:
+            seen.add(link)
+            async with aiohttp.ClientSession() as session:
+                async with session.get(link) as r:
+                    t=await r.text()
+                    totalLinks[0]+=1
+                    print(f"fetched {link}")
+                    soup=b(t,"html.parser")
+                    count=countWords(soup)
+                    counter.update(count)
+                    newlinks=absoluteLinks(soup,link)
+                    new_dept=depth+1
+                    await asyncio.gather(*asSearch(newlinks,counter,new_dept,seen,totalLinks,Max))
+
+    return [counter,totalLinks[0]]
+            
+
 
 def getPages(t,link,depth,mode):
     link=[link]
     if mode:
-       count=asyncio.run(asSearch(link[0]))
+       count=asyncio.run(asSearch(link,Max=depth))
        print(count)
        return
     if input("want all the links? + the count?")=="y":
