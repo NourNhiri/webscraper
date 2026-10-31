@@ -21,42 +21,20 @@ def findJPG(html:b):
 
     return tags
 
-async def asSearch(links,counter=None,depth=0,seen=None,totalLinks=None,Max=2):
-    if depth==Max:return [counter,totalLinks]
-    if seen==None:seen=set()
-    if counter==None:counter=Counter()
-    if totalLinks is None: totalLinks=[0]
-    tasks=[]
-    for link in links:
-        if link not in seen:
-            seen.add(link)
-            tasks.append(runLinks(link,totalLinks,counter,depth,seen,Max))
-    await asyncio.gather(*tasks)
 
-    return [counter,totalLinks[0]]
             
-async def runLinks(link,totalLinks,counter,depth,seen,Max):
-    async with aiohttp.ClientSession() as session:
-        try:
-            async with session.get(link) as r:
-                r.raise_for_status()
-                t=await r.text()
-                totalLinks[0]+=1
-                print(f"fetched {link}")
-                soup=b(t,"html.parser")
-                count=countWords(soup)
-                counter.update(count)
-                newlinks=absoluteLinks(soup,link)
-                new_dept=depth+1
-                await asSearch(newlinks,counter,new_dept,seen,totalLinks,Max)
-        except aiohttp.ClientError as e:
-            print(e)
-        except TimeoutError as e:
-            print(e)
-        except UnicodeError as e:
-            print(f"geen inhoud gekregen {e}")
+
         
     
+def handleSoup(totalLinks,counter,t,depth,link):
+    totalLinks[0]+=1
+    print(f"fetched {link}")
+    soup=b(t,"html.parser")
+    count=countWords(soup)
+    counter.update(count)
+    newlinks=absoluteLinks(soup,link)
+    new_dept=depth+1
+    return newlinks,new_dept
 
 
 def getPages(t,link,depth,mode):
@@ -91,7 +69,20 @@ def absoluteLinks(soup,link):
             links.append(l)
     return links
     
-
+async def runLinks(link,totalLinks,counter,depth,seen,Max):
+    async with aiohttp.ClientSession() as session:
+        try:
+            async with session.get(link) as r:
+                r.raise_for_status()
+                t=await r.text()
+                newlinks,new_dept=handleSoup(totalLinks,counter,t,depth,link)
+                await asSearch(newlinks,counter,new_dept,seen,totalLinks,Max)
+        except aiohttp.ClientError as e:
+            print(e)
+        except TimeoutError as e:
+            print(e)
+        except UnicodeError as e:
+            print(f"geen inhoud gekregen {e}")
 
 def recursiveSearch(links,counter=None,depth=0,seen=None,totalLinks=None,Max=2):
     if depth==Max:return [counter,totalLinks]
@@ -106,19 +97,25 @@ def recursiveSearch(links,counter=None,depth=0,seen=None,totalLinks=None,Max=2):
             except ClickException as e:
                 print(e)
             else:
-                totalLinks[0]+=1
-                print(f"fetched {item}")
-                soup=b(html,"html.parser")
-                count=countWords(soup)
-                counter.update(count)
-                newlinks=absoluteLinks(soup,item)
-                new_dept=depth+1
+                newlinks,new_dept=handleSoup(totalLinks,counter,html,depth,item)
                 recursiveSearch(newlinks,counter,new_dept,seen,totalLinks,Max)
     return [counter,totalLinks[0]]
 
 
 
+async def asSearch(links,counter=None,depth=0,seen=None,totalLinks=None,Max=2):
+    if depth==Max:return [counter,totalLinks]
+    if seen==None:seen=set()
+    if counter==None:counter=Counter()
+    if totalLinks is None: totalLinks=[0]
+    tasks=[]
+    for link in links:
+        if link not in seen:
+            seen.add(link)
+            tasks.append(runLinks(link,totalLinks,counter,depth,seen,Max))
+    await asyncio.gather(*tasks)
 
+    return [counter,totalLinks[0]]
 
 
 
